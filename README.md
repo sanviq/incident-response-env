@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # 🚨 Incident Response Triage Environment
 
 An OpenEnv environment where an AI agent acts as an on-call **Site Reliability Engineer (SRE)**, responding to real-world production system alerts.
@@ -155,3 +156,15 @@ incident-response-env/
 - ✅ All rewards in [0.0, 1.0]
 - ✅ Graders produce varying scores (not all same value)
 - ✅ 3 tasks with easy → medium → hard difficulty progression
+=======
+---
+title: Incident Response Env
+emoji: 👀
+colorFrom: purple
+colorTo: green
+sdk: docker
+pinned: false
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+>>>>>>> 7122f408178f3ad1663bcb9684702c45cf646d6c
