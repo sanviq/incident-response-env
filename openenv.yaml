@@ -1,0 +1,90 @@
+name: incident-response-env
+version: "1.0.0"
+description: >
+  A real-world OpenEnv environment that simulates production incident response for Site Reliability Engineers.
+  An AI agent receives system alerts and must classify severity, select correct remediations,
+  and manage cascading failures — tasks that real SREs perform daily.
+author: openenv-participant
+tags:
+  - openenv
+  - incident-response
+  - sre
+  - real-world
+  - devops
+
+observation_space:
+  type: object
+  properties:
+    task_name:
+      type: string
+      description: Name of the current task
+    step_number:
+      type: integer
+      description: Current step index within the episode
+    alert_message:
+      type: string
+      description: The system alert message the agent must act on
+    system_context:
+      type: object
+      description: Additional metadata about the affected system
+    options:
+      type: object
+      nullable: true
+      description: "For select-remediation: map of option letter to description (A/B/C/D)"
+    pending_alerts:
+      type: array
+      nullable: true
+      description: "For cascading-alerts: list of unresolved alerts"
+    task_description:
+      type: string
+      description: Natural language instructions for the agent
+    hint:
+      type: string
+      nullable: true
+      description: Response format guidance
+
+action_space:
+  type: object
+  properties:
+    response:
+      type: string
+      description: Agent free-text response to the alert
+
+reward:
+  type: float
+  range: [0.0, 1.0]
+  description: >
+    Weighted composite score per task.
+    classify-alert: accuracy (80%) + reasoning quality (20%).
+    select-remediation: option correctness (75%) + reasoning quality (25%).
+    cascading-alerts: priority correctness (40%) + identification (30%) + remediation quality (30%).
+
+tasks:
+  - name: classify-alert
+    difficulty: easy
+    max_steps: 1
+    description: Classify a single system alert as low, medium, or critical severity.
+    success_threshold: 0.5
+
+  - name: select-remediation
+    difficulty: medium
+    max_steps: 1
+    description: Select the best remediation action from 4 options (A/B/C/D) for a given alert.
+    success_threshold: 0.5
+
+  - name: cascading-alerts
+    difficulty: hard
+    max_steps: 3
+    description: Handle 3 simultaneous alerts over 3 steps, prioritising by severity and remediating each.
+    success_threshold: 0.5
+
+baseline_scores:
+  classify-alert: 0.72
+  select-remediation: 0.65
+  cascading-alerts: 0.58
+
+endpoints:
+  reset: POST /reset
+  step: POST /step
+  state: GET /state
+  health: GET /health
