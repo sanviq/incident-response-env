@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚨 Incident Response Triage Environment
 
 An OpenEnv environment where an AI agent acts as an on-call **Site Reliability Engineer (SRE)**, responding to real-world production system alerts.
@@ -143,3 +144,14 @@ incident-response-env/
 ## 🏷️ Tags
 
 `openenv` `incident-response` `sre` `real-world` `devops`
+=======
+## ✅ OpenEnv Spec Compliance
+ 
+- ✅ `reset()` returns clean typed `ResetResult` with `IncidentObservation`
+- ✅ `step()` returns `StepResult` with observation, reward, done, info
+- ✅ `state()` returns `EnvState` with full episode metadata
+- ✅ All models are Pydantic-typed
+- ✅ Graders are deterministic (same input → same score, always)
+- ✅ All rewards in [0.0, 1.0]
+- ✅ Graders produce varying scores (not all same value)
+- ✅ 3 tasks with easy → medium → hard difficulty progression
