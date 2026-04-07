@@ -1,3 +1,14 @@
+---
+title: Incident Response Env
+emoji: 🚨
+colorFrom: red
+colorTo: pink
+sdk: docker
+pinned: false
+tags:
+  - openenv
+---
+
 # Incident Response Triage Environment
 
 An OpenEnv-compatible reinforcement learning environment that simulates the
