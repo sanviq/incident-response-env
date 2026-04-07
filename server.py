@@ -1,12 +1,3 @@
-"""
-Incident Response Triage — OpenEnv Environment Server
-======================================================
-Exposes the OpenEnv API via FastAPI:
-  POST /reset   → start a new episode
-  POST /step    → send an action, receive (observation, reward, done, info)
-  GET  /state   → current episode state
-"""
-
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -19,10 +10,7 @@ from tasks import list_tasks, TASKS
 
 app = FastAPI(
     title="Incident Response Triage Environment",
-    description=(
-        "A real-world OpenEnv environment where an AI agent acts as an on-call SRE, "
-        "triaging production incidents across three tasks of increasing difficulty."
-    ),
+    description="A real-world OpenEnv environment where an AI agent acts as an on-call SRE, triaging production incidents across three tasks of increasing difficulty.",
     version="1.0.0",
 )
 
@@ -52,9 +40,86 @@ def root():
     }
 
 
+# ✅ FIXED: return "healthy" not "ok"
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "healthy"}
+
+
+# ✅ NEW: /metadata endpoint
+@app.get("/metadata")
+def metadata():
+    return {
+        "name": "Incident Response Triage Environment",
+        "description": (
+            "A real-world OpenEnv environment simulating production incident response. "
+            "An AI agent acts as an on-call SRE, classifying alerts, selecting remediations, "
+            "and handling cascading failures across three tasks of increasing difficulty."
+        ),
+        "version": "1.0.0",
+        "tasks": [
+            {"name": name, "difficulty": info["difficulty"], "max_steps": info["max_steps"]}
+            for name, info in TASKS.items()
+        ],
+    }
+
+
+# ✅ NEW: /schema endpoint
+@app.get("/schema")
+def schema():
+    return {
+        "action": {
+            "type": "object",
+            "properties": {
+                "response": {
+                    "type": "string",
+                    "description": "Agent free-text response to the alert",
+                }
+            },
+            "required": ["response"],
+        },
+        "observation": {
+            "type": "object",
+            "properties": {
+                "task_name": {"type": "string"},
+                "step_number": {"type": "integer"},
+                "alert_message": {"type": "string"},
+                "system_context": {"type": "object"},
+                "options": {"type": "object", "nullable": True},
+                "pending_alerts": {"type": "array", "nullable": True},
+                "task_description": {"type": "string"},
+                "hint": {"type": "string", "nullable": True},
+            },
+        },
+        "state": {
+            "type": "object",
+            "properties": {
+                "task_name": {"type": "string"},
+                "step_number": {"type": "integer"},
+                "done": {"type": "boolean"},
+                "cumulative_reward": {"type": "number"},
+                "max_steps": {"type": "integer"},
+            },
+        },
+    }
+
+
+# ✅ NEW: /mcp endpoint (JSON-RPC)
+@app.post("/mcp")
+def mcp(request: dict = None):
+    return {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "result": {
+            "name": "Incident Response Triage Environment",
+            "version": "1.0.0",
+            "capabilities": {
+                "reset": True,
+                "step": True,
+                "state": True,
+            },
+        },
+    }
 
 
 @app.post("/reset", response_model=ResetResult)
