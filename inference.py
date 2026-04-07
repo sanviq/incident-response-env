@@ -4,12 +4,20 @@ inference.py — Baseline Inference Script
 Runs an LLM agent through ALL scenarios in each of the 3 tasks.
 Prints structured logs in the required [START] / [STEP] / [END] format.
 
-Environment variables:
-  API_BASE_URL   The OpenAI-compatible API endpoint for the LLM.
-  MODEL_NAME     The model identifier.
-  HF_TOKEN       Your Hugging Face / API key.
-  ENV_BASE_URL   Base URL of the running environment server
-                 (default: https://sanviq-incident-response-env.hf.space)
+Environment variables (all optional except one of the key vars):
+  OPENAI_API_KEY   OpenAI API key  (checked first, per OpenEnv spec)
+  HF_TOKEN         Hugging Face token  (fallback)
+  API_KEY          Generic fallback key
+  API_BASE_URL     OpenAI-compatible endpoint
+                   (default: https://router.huggingface.co/v1)
+  MODEL_NAME       Model identifier
+                   (default: Qwen/Qwen2.5-72B-Instruct)
+  ENV_BASE_URL     Base URL of the running environment server
+                   (default: https://sanviq-incident-response-env.hf.space)
+
+Quickstart:
+  export OPENAI_API_KEY=sk-...
+  python inference.py
 """
 
 import os
@@ -21,12 +29,17 @@ import httpx
 from openai import OpenAI
 
 # ------------------------------------------------------------------
-# Configuration
+# Configuration  —  OPENAI_API_KEY is the canonical name per spec
 # ------------------------------------------------------------------
-API_KEY: str      = os.getenv("HF_TOKEN") or os.getenv("API_KEY") or "dummy"
-API_BASE_URL: str = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
-MODEL_NAME: str   = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
-ENV_BASE_URL: str = os.getenv(
+API_KEY: str = (
+    os.environ.get("OPENAI_API_KEY")
+    or os.environ.get("HF_TOKEN")
+    or os.environ.get("API_KEY")
+    or "dummy"
+)
+API_BASE_URL: str = os.environ.get("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME: str   = os.environ.get("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
+ENV_BASE_URL: str = os.environ.get(
     "ENV_BASE_URL", "https://sanviq-incident-response-env.hf.space"
 )
 BENCHMARK: str          = "incident-response-env"
@@ -332,6 +345,15 @@ def main() -> None:
         f"[DEBUG] Starting | API: {API_BASE_URL} | Model: {MODEL_NAME} | Env: {ENV_BASE_URL}",
         flush=True,
     )
+
+    using_openai_key = bool(os.environ.get("OPENAI_API_KEY"))
+    if not using_openai_key:
+        print(
+            "[DEBUG] OPENAI_API_KEY not set — "
+            "will fall back to rule-based responses if LLM call fails.",
+            flush=True,
+        )
+
     client  = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
     results: List[Dict[str, Any]] = []
 
