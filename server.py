@@ -6,7 +6,7 @@ import uvicorn
 
 from models import IncidentAction, ResetResult, StepResult, StateResult
 from environment import IncidentResponseEnv
-from tasks import list_tasks, TASKS
+from tasks import list_tasks, TASKS, scenario_count
 
 app = FastAPI(
     title="Incident Response Triage Environment",
@@ -40,13 +40,11 @@ def root():
     }
 
 
-# ✅ FIXED: return "healthy" not "ok"
 @app.get("/health")
 def health():
     return {"status": "healthy"}
 
 
-# ✅ NEW: /metadata endpoint
 @app.get("/metadata")
 def metadata():
     return {
@@ -58,13 +56,17 @@ def metadata():
         ),
         "version": "1.0.0",
         "tasks": [
-            {"name": name, "difficulty": info["difficulty"], "max_steps": info["max_steps"]}
+            {
+                "name": name,
+                "difficulty": info["difficulty"],
+                "max_steps": info["max_steps"],
+                "scenario_count": scenario_count(name),
+            }
             for name, info in TASKS.items()
         ],
     }
 
 
-# ✅ NEW: /schema endpoint
 @app.get("/schema")
 def schema():
     return {
@@ -98,7 +100,6 @@ def schema():
     }
 
 
-# ✅ NEW: /mcp endpoint (JSON-RPC)
 @app.post("/mcp")
 async def mcp():
     return {
@@ -152,6 +153,7 @@ def get_tasks():
                 "difficulty": info["difficulty"],
                 "max_steps": info["max_steps"],
                 "description": info["description"],
+                "scenario_count": scenario_count(name),
             }
             for name, info in TASKS.items()
         ]

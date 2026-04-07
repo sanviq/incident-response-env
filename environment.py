@@ -1,7 +1,7 @@
 from typing import Dict, Any, List
 
 from models import AlertObservation, StepResult, ResetResult, StateResult, IncidentAction
-from tasks import get_task_info, get_task_scenario, list_tasks, TASKS
+from tasks import get_task_info, get_task_scenario, list_tasks, TASKS, scenario_count
 from graders import grade_classify_alert, grade_select_remediation, grade_cascading_alerts
 
 
@@ -58,7 +58,7 @@ class IncidentResponseEnv:
         reward = self._compute_reward(action.response)
         self.cumulative_reward = round(self.cumulative_reward + reward, 3)
 
-        # Track which alerts have been addressed for cascading task
+        # Track which alerts have been handled (cascading task)
         if self.task_name == "cascading-alerts":
             for alert in self.scenario["alerts"]:
                 aid = alert["id"]
@@ -76,6 +76,7 @@ class IncidentResponseEnv:
                 "max_steps": self.max_steps,
                 "cumulative_reward": self.cumulative_reward,
                 "task": self.task_name,
+                "scenario_index": self.scenario_index,
             },
         )
 
@@ -140,9 +141,10 @@ class IncidentResponseEnv:
                     "Handle the highest-priority one now."
                 ),
                 system_context={
-                    "total_alerts": 3,
+                    "total_alerts": len(self.scenario["alerts"]),
                     "handled_count": len(self.handled_alerts),
                     "remaining_count": len(remaining),
+                    "handled_ids": self.handled_alerts,
                 },
                 pending_alerts=remaining,
                 task_description=task_info["description"],
@@ -169,4 +171,5 @@ class IncidentResponseEnv:
             "done": self.done,
             "cumulative_reward": self.cumulative_reward,
             "scenario_index": self.scenario_index,
+            "scenario_count": scenario_count(self.task_name),
         }
