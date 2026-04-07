@@ -71,10 +71,7 @@ def schema():
         "action": {
             "type": "object",
             "properties": {
-                "response": {
-                    "type": "string",
-                    "description": "Agent free-text response to the alert",
-                }
+                "response": {"type": "string"}
             },
             "required": ["response"],
         },
@@ -85,10 +82,7 @@ def schema():
                 "step_number": {"type": "integer"},
                 "alert_message": {"type": "string"},
                 "system_context": {"type": "object"},
-                "options": {"type": "object", "nullable": True},
-                "pending_alerts": {"type": "array", "nullable": True},
                 "task_description": {"type": "string"},
-                "hint": {"type": "string", "nullable": True},
             },
         },
         "state": {
@@ -106,18 +100,14 @@ def schema():
 
 # ✅ NEW: /mcp endpoint (JSON-RPC)
 @app.post("/mcp")
-def mcp(request: dict = None):
+async def mcp():
     return {
         "jsonrpc": "2.0",
         "id": 1,
         "result": {
             "name": "Incident Response Triage Environment",
             "version": "1.0.0",
-            "capabilities": {
-                "reset": True,
-                "step": True,
-                "state": True,
-            },
+            "capabilities": {"reset": True, "step": True, "state": True},
         },
     }
 
