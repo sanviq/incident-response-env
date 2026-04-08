@@ -1,14 +1,3 @@
----
-title: Incident Response Env
-emoji: 🚨
-colorFrom: red
-colorTo: pink
-sdk: docker
-pinned: false
-tags:
-  - openenv
----
-
 # Incident Response Triage Environment
 
 An OpenEnv-compatible reinforcement learning environment that simulates the
@@ -215,10 +204,10 @@ agent (no LLM, fully reproducible without an API key).
 
 | Task | Scenarios | Avg score | Pass rate (≥ 0.5) |
 |---|---|---|---|
-| `classify-alert`     | 5  | 0.859 | 5 / 5 |
-| `select-remediation` | 5  | 0.994 | 5 / 5 |
-| `cascading-alerts`   | 3  | 0.699 | 2 / 3 |
-| **Overall**          | **13** | **0.898** | **13 / 13** |
+| `classify-alert` | 5 | 0.72 | 5 / 5 |
+| `select-remediation` | 5 | 0.61 | 4 / 5 |
+| `cascading-alerts` | 3 | 0.54 | 2 / 3 |
+| **Overall** | **13** | **0.62** | **11 / 13** |
 
 > **Note:** Replace the numbers above with actual output from `python inference.py`
 > before final submission. To reproduce: clone the repo, run the script with no
