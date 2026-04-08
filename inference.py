@@ -68,9 +68,12 @@ SYSTEM_PROMPT = textwrap.dedent("""
       Example: "B - rolling back the faulty deployment is the fastest path to restoring stability."
 
     For cascading-alerts:
-      You will handle one alert per step. Respond with:
-        ALERT ID - severity - remediation action in 1-2 sentences.
-      Example: "ALERT-001 - critical - Restart the payment-service pods immediately and page the on-call engineer."
+      You will handle one alert per step.
+      CRITICAL: Copy the EXACT alert ID shown in the Pending Alerts list.
+      Never invent IDs. Never reuse an ID from a previous step.
+      Each step, pick the HIGHEST severity unhandled alert from the list.
+      Format: EXACT-ID - severity - remediation in 1-2 sentences.
+      Example: if list shows [INC-1], respond "INC-1 - critical - Restart pods and page on-call engineer immediately."
 """).strip()
 
 
@@ -140,6 +143,12 @@ def _extract_severity(alert: str) -> str:
 
 def _best_remediation_option(observation: Dict[str, Any]) -> str:
     alert = observation.get("alert_message", "").lower()
+    if task == "cascading-alerts" and pending:
+        # NEW: sort by severity so fallback also picks critical first
+        sev_order = {"critical": 0, "medium": 1, "low": 2}
+        pending = sorted(pending, key=lambda a: sev_order.get(a.get("severity", "low"), 2))
+        top = pending[0]
+        # ... rest stays the same
     options: Dict[str, str] = observation.get("options", {})
 
     if any(k in alert for k in ["deploy", "5xx", "spike", "v2."]):
@@ -245,7 +254,7 @@ def build_user_prompt(observation: Dict[str, Any]) -> str:
             f"  [{a['id']}] (severity: {a.get('severity', '?')}) {a['alert']}"
             for a in pending
         )
-        parts.append(f"Pending Alerts:\n{alerts_text}")
+    parts.append(f"Pending Alerts (use EXACT IDs from this list):\n{alerts_text}")
     hint = observation.get("hint", "")
     if hint:
         parts.append(f"Instruction: {hint}")
