@@ -65,7 +65,7 @@ SYSTEM_PROMPT = textwrap.dedent("""
     For cascading-alerts:
       You will handle one alert per step. Respond with:
         ALERT ID - severity - remediation action in 1-2 sentences.
-      Example: "ALERT-001 - critical - Restart the payment-service pods immediately and page the on-call engineer."
+      Example: if pending list shows INC-1, INC-2, INC-3 — respond "INC-1 - critical - Restart affected pods and page on-call engineer immediately." Use EXACT IDs from the list above, never invent IDs.
 """).strip()
 
 
@@ -218,7 +218,7 @@ def build_user_prompt(observation: Dict[str, Any]) -> str:
         parts.append(f"Options:\n{opts}")
     if pending:
         alerts_text = "\n".join(
-            f"  [{a['id']}] (severity: {a.get('severity','?')}) {a['alert']}"
+            f"  {a['id']} (severity: {a.get('severity','?')}) {a['alert']}"
             for a in pending
         )
         parts.append(f"Pending Alerts:\n{alerts_text}")
