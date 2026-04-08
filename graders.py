@@ -36,6 +36,8 @@ def grade_classify_alert(response: str, scenario: Dict[str, Any]) -> float:
     """
     severity_scores: Dict[str, float] = scenario["severity_scores"]
     detected = _extract_severity(response)
+    if not response.strip() or len(response.strip()) < 3:
+        return 0.0  # explicit penalty for empty/nonsense response
     accuracy_score = severity_scores.get(detected, 0.0) if detected else 0.0
 
     word_count = len(response.split())
