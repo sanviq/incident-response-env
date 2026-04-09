@@ -42,7 +42,7 @@ def grade_classify_alert(response: str, scenario: Dict[str, Any]) -> float:
     quality_score = min(1.0, word_count / 15.0)
 
     final = accuracy_score * 0.8 + quality_score * 0.2
-    return round(min(max(final, 0.0), 1.0), 3)
+    return round(min(max(final, 0.01), 0.99), 3)
 
 
 def grade_select_remediation(response: str, scenario: Dict[str, Any]) -> float:
@@ -76,7 +76,7 @@ def grade_select_remediation(response: str, scenario: Dict[str, Any]) -> float:
     reasoning_score = min(1.0, len(response.split()) / 25.0)
 
     final = option_score * 0.75 + reasoning_score * 0.25
-    return round(min(max(final, 0.0), 1.0), 3)
+    return round(min(max(final, 0.01), 0.99), 3)
 
 
 def grade_cascading_alerts(
@@ -104,13 +104,13 @@ def grade_cascading_alerts(
             break
 
     if detected_id == expected_id:
-        priority_score = 1.0
+        priority_score = 0.99
     elif detected_id in correct_priority:
         priority_score = 0.4  # valid alert, wrong order
     else:
         priority_score = 0.05
 
-    identification_score = 1.0 if detected_id else 0.0
+    identification_score = 0.99 if detected_id else 0.01
     remediation_score = min(1.0, len(response.split()) / 30.0)
 
     final = (
@@ -118,4 +118,4 @@ def grade_cascading_alerts(
         + identification_score * 0.3
         + remediation_score * 0.3
     )
-    return round(min(max(final, 0.0), 1.0), 3)
+    return round(min(max(final, 0.01), 0.99), 3)
